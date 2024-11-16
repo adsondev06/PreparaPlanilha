@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Importar Planilhas e Consolidar Dados</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+</head>
+<body>
+  <h1>Preparar Bipagem De Rotas</h1>
+
+  <div id="file-sections">
+    <!-- Primeira seção padrão -->
+    <div class="file-section" id="section-0">
+      <label for="file-input-0">Arquivo XLSX:</label>
+      <input type="file" id="file-input-0" class="file-input" accept=".xlsx" />
+
+      <label for="driver-pattern-0">Nome do Motorista:</label>
+      <input type="text" id="driver-pattern-0" class="driver-pattern" placeholder="EX: Leste1__1" />
+
+      <label for="owner-name-0">Nome do Dono:</label>
+      <input type="text" id="owner-name-0" class="owner-name" placeholder="Digite o nome do dono" />
+    </div>
+  </div> <br>
+
+  <button id="add-section">Adicionar Mais Arquivo</button> <br>
+  <button id="process-files">Processar Arquivos</button> <br>
+
+  <script src="script.js"></script>
+</body>
+</html>

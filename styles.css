@@ -1,0 +1,134 @@
+/* Reset básico */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* Estilos gerais do corpo */
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f0f0f0;
+  color: #333;
+  padding: 20px;
+  display: flex;
+  justify-content: center; /* Centraliza horizontalmente */
+  align-items: center; /* Centraliza verticalmente */
+  flex-direction: column;
+  height: 100vh; /* Garante que o body ocupe a tela inteira */
+  overflow: hidden; /* Evita rolagem no fundo */
+  text-align: center; /* Centraliza o texto */
+}
+
+/* Título */
+h1 {
+  font-size: 2.5rem;
+  margin-bottom: 30px;
+  color: #2c3e50;
+}
+
+/* Container principal para as seções de arquivo */
+#file-sections {
+  display: flex;
+  flex-wrap: wrap; /* Permite quebrar as seções para a linha seguinte */
+  gap: 20px;
+  justify-content: center; /* Centraliza as seções dentro do container */
+  margin-bottom: 30px;
+  width: 100%;
+  max-width: 700px; /* Largura máxima do contêiner */
+  overflow-y: auto; /* Permite rolar se o conteúdo for grande */
+}
+
+/* Estilo para cada seção de arquivo */
+.file-section {
+  background-color: #ffffff;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 230px; /* Largura fixa para as seções */
+  flex-grow: 1; /* Faz com que as seções cresçam igualmente */
+  max-width: 100%; /* Garante que as seções não ultrapassem a largura do container */
+}
+
+.file-section label {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #7f8c8d;
+}
+
+.file-section input[type="file"],
+.file-section input[type="text"] {
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: border-color 0.3s ease;
+}
+
+.file-section input[type="file"]:focus,
+.file-section input[type="text"]:focus {
+  border-color: #3498db;
+  outline: none;
+}
+
+/* Estilo para botões */
+button {
+  background-color: #3498db;
+  color: white;
+  border: none;
+  padding: 12px 25px;
+  border-radius: 8px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  width: 100%; /* Botões ocupam toda a largura disponível */
+  max-width: 700px; /* Botões com largura máxima de 700px */
+  margin-top: 10px; /* Adiciona espaçamento superior */
+}
+
+button:hover {
+  background-color: #2980b9;
+  transform: scale(1.05);
+}
+
+/* Estilo para o botão de "Adicionar Mais Arquivo" */
+#add-section {
+  background-color: #27ae60;
+}
+
+#add-section:hover {
+  background-color: #2ecc71;
+}
+
+/* Estilo para o botão de "Processar Arquivos" */
+#process-files {
+  background-color: #e74c3c;
+}
+
+#process-files:hover {
+  background-color: #c0392b;
+}
+
+/* Responsividade para telas pequenas */
+@media (max-width: 768px) {
+  h1 {
+    font-size: 2rem;
+  }
+
+  #file-sections {
+    width: 100%;
+    padding: 0 15px;
+  }
+
+  .file-section {
+    padding: 15px;
+    width: 100%; /* Se a tela for pequena, as seções ocupam toda a largura */
+  }
+
+  button {
+    width: 100%;
+  }
+}
