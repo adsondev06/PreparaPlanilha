@@ -2,19 +2,13 @@
 
 // // Função para preencher o campo driver-pattern com o nome do arquivo
 // function preencherDriverPatternComNomeArquivo(inputFileId, driverPatternId) {
-//   // Obter o nome do arquivo do input
 //   let inputFile = document.getElementById(inputFileId);
 //   let fileName = inputFile.files.length > 0 ? inputFile.files[0].name : "";
-
-//   // Remover a extensão do arquivo
 //   let nomeSemExtensao = fileName.split('.').slice(0, -1).join('.');
-
-//   // Preencher o campo driver-pattern com o nome do arquivo sem extensão
 //   document.getElementById(driverPatternId).value = nomeSemExtensao;
 // }
 
-// // Função para adicionar mais seções
-// document.getElementById('add-section').addEventListener('click', function() {
+// document.getElementById('add-section').addEventListener('click', function () {
 //   let newSection = document.createElement('div');
 //   newSection.classList.add('file-section');
 //   newSection.id = `section-${sectionCount}`;
@@ -28,38 +22,55 @@
 
 //     <label for="owner-name-${sectionCount}">Nome do Dono:</label>
 //     <input type="text" id="owner-name-${sectionCount}" class="owner-name" placeholder="Digite o nome do dono" />
+
+//     <button type="button" class="remove-section" data-section-id="section-${sectionCount}">Remover</button>
 //   `;
 
-//   // Adiciona a nova seção ao container
 //   document.getElementById('file-sections').appendChild(newSection);
 
-//   // Adiciona o evento de mudança de arquivo para o input recém-adicionado
-//   document.getElementById(`file-input-${sectionCount}`).addEventListener('change', function() {
-//     // Preencher o campo driver-pattern com o nome do arquivo carregado
-//     preencherDriverPatternComNomeArquivo(`file-input-${sectionCount}`, `driver-pattern-${sectionCount}`);
+//   let fileInput = document.getElementById(`file-input-${sectionCount}`);
+//   let driverPatternInput = document.getElementById(`driver-pattern-${sectionCount}`);
+
+//   fileInput.addEventListener('change', function () {
+//     if (fileInput.files.length > 0) {
+//       let fileName = fileInput.files[0].name;
+//       let nomeSemExtensao = fileName.split('.').slice(0, -1).join('.');
+//       driverPatternInput.value = nomeSemExtensao;
+//     }
 //   });
 
-//   sectionCount++; // Incrementa o contador para a próxima seção
+//   sectionCount++; // Incrementa o contador
 // });
 
-// // Preencher o campo driver-pattern-0 com o nome do arquivo assim que for carregado
-// document.getElementById('file-input-0').addEventListener('change', function() {
+// // Evento para remover uma seção
+// document.getElementById('file-sections').addEventListener('click', function (e) {
+//   if (e.target.classList.contains('remove-section')) {
+//     let sectionId = e.target.dataset.sectionId; // Obtém o ID da seção a ser removida
+//     let sectionToRemove = document.getElementById(sectionId);
+//     if (sectionToRemove) {
+//       sectionToRemove.remove();
+//     }
+//   }
+// });
+
+// // Preencher o campo driver-pattern-0 com o nome do arquivo ao carregá-lo
+// document.getElementById('file-input-0').addEventListener('change', function () {
 //   preencherDriverPatternComNomeArquivo('file-input-0', 'driver-pattern-0');
 // });
 
 // // Função para processar os arquivos
-// document.getElementById('process-files').addEventListener('click', function() {
-//   let allData = [];  // Armazena todos os dados extraídos de todos os arquivos
+// document.getElementById('process-files').addEventListener('click', function () {
+//   let allData = [];
+//   let filesProcessed = 0;
+//   let codeCount = {};
 
-//   let filesProcessed = 0; // Contador para verificar se todos os arquivos foram processados
-
-//   // Itera por todas as seções de arquivos
 //   for (let i = 0; i < sectionCount; i++) {
 //     let fileInput = document.getElementById(`file-input-${i}`);
+//     if (!fileInput) continue; // Ignora se a seção foi removida
+
 //     let driverPattern = document.getElementById(`driver-pattern-${i}`).value.trim();
 //     let ownerName = document.getElementById(`owner-name-${i}`).value.trim();
 
-//     // Verifica se os campos foram preenchidos corretamente
 //     if (fileInput.files.length === 0 || !driverPattern || !ownerName) {
 //       alert("Por favor, preencha todos os campos antes de processar.");
 //       return;
@@ -68,46 +79,39 @@
 //     let file = fileInput.files[0];
 //     let reader = new FileReader();
 
-//     reader.onload = function(event) {
+//     reader.onload = function (event) {
 //       let data = event.target.result;
 //       let workbook = XLSX.read(data, { type: 'binary' });
 //       let sheet = workbook.Sheets[workbook.SheetNames[0]];
 //       let jsonData = XLSX.utils.sheet_to_json(sheet, { header: 1 });
 
-//       // Processar os dados da planilha
-//       let rowNumber = 1; // Inicializa a numeração do motorista
-//       for (let i = 10; i < jsonData.length; i++) {
-//         let row = jsonData[i];
-
-//         let codigo = row[18]; // Extrai o código da coluna S (índice 18)
+//       let rowNumber = 1;
+//       for (let j = 10; j < jsonData.length; j++) {
+//         let row = jsonData[j];
+//         let codigo = row[18];
 //         if (codigo) {
-//           // Concatena '-1' se o código começar com 13, 75 ou 76
-//           if (/^(13|75|76)/.test(codigo)) {
-//             codigo = codigo + '-1';
+//           if (codeCount[codigo]) {
+//             codeCount[codigo]++;
+//           } else {
+//             codeCount[codigo] = 1;
 //           }
+//           codigo = `${codigo}-${codeCount[codigo]}`;
+//           let motorista = driverPattern.replace('__1', '') + '__' + rowNumber;
 
-//           // Adiciona os dados processados ao array allData
-//           // Modifica a forma de incremento para o motorista: garantindo numeração sequencial
-//           let motorista = driverPattern.replace('__1', '') + '__' + rowNumber; // Remove '__1' e adiciona a numeração
-
-//           // A numeração não será repetida
 //           allData.push({
 //             'Código': codigo,
-//             'Motorista': motorista, // Como 'Leste1__1', 'Leste1__2' etc.
-//             'Cliente': row[1], // Coluna B
-//             'Dono': ownerName // Coluna D
+//             'Motorista': motorista,
+//             'Cliente': row[1],
+//             'Dono': ownerName
 //           });
 
-//           rowNumber++; // Incrementa a numeração para o próximo motorista
+//           rowNumber++;
 //         }
 //       }
 
-//       // Incrementa o contador para indicar que o arquivo foi processado
 //       filesProcessed++;
-
-//       // Quando todos os arquivos forem processados, gera o novo arquivo XLSX
 //       if (filesProcessed === sectionCount) {
-//         gerarPlanilha(allData); // Chama a função para gerar a planilha
+//         gerarPlanilha(allData);
 //       }
 //     };
 
@@ -121,7 +125,6 @@
 //   let wb = XLSX.utils.book_new();
 //   XLSX.utils.book_append_sheet(wb, ws, "Dados Processados");
 
-//   // Gera o arquivo e oferece para o usuário baixar com nome formatado
 //   let dataHoje = new Date();
 //   let dia = ("0" + dataHoje.getDate()).slice(-2);
 //   let mes = ("0" + (dataHoje.getMonth() + 1)).slice(-2);
@@ -133,23 +136,16 @@
 
 
 
-
 let sectionCount = 1; // Contador para controlar as seções de arquivos
 
 // Função para preencher o campo driver-pattern com o nome do arquivo
 function preencherDriverPatternComNomeArquivo(inputFileId, driverPatternId) {
-  // Obter o nome do arquivo do input
   let inputFile = document.getElementById(inputFileId);
   let fileName = inputFile.files.length > 0 ? inputFile.files[0].name : "";
-
-  // Remover a extensão do arquivo
   let nomeSemExtensao = fileName.split('.').slice(0, -1).join('.');
-
-  // Preencher o campo driver-pattern com o nome do arquivo sem extensão
   document.getElementById(driverPatternId).value = nomeSemExtensao;
 }
 
-// Função para adicionar mais seções
 document.getElementById('add-section').addEventListener('click', function () {
   let newSection = document.createElement('div');
   newSection.classList.add('file-section');
@@ -164,15 +160,29 @@ document.getElementById('add-section').addEventListener('click', function () {
 
     <label for="owner-name-${sectionCount}">Nome do Dono:</label>
     <input type="text" id="owner-name-${sectionCount}" class="owner-name" placeholder="Digite o nome do dono" />
+
+    <button type="button" class="remove-section" data-section-id="section-${sectionCount}">Remover Seção</button>
   `;
 
-  // Adiciona a nova seção ao container
   document.getElementById('file-sections').appendChild(newSection);
 
   // Adiciona o evento de mudança de arquivo para o input recém-adicionado
-  document.getElementById(`file-input-${sectionCount}`).addEventListener('change', function () {
-    // Preencher o campo driver-pattern com o nome do arquivo carregado
-    preencherDriverPatternComNomeArquivo(`file-input-${sectionCount}`, `driver-pattern-${sectionCount}`);
+  let fileInput = document.getElementById(`file-input-${sectionCount}`);
+  let driverPatternInput = document.getElementById(`driver-pattern-${sectionCount}`);
+
+  fileInput.addEventListener('change', function () {
+    if (fileInput.files.length > 0) {
+      let fileName = fileInput.files[0].name;
+      let nomeSemExtensao = fileName.split('.').slice(0, -1).join('.');
+      driverPatternInput.value = nomeSemExtensao; // Preenche o campo com o nome do arquivo
+    }
+  });
+
+  // Adiciona o evento ao botão de remoção
+  let removeButton = newSection.querySelector('.remove-section');
+  removeButton.addEventListener('click', function () {
+    let sectionId = removeButton.getAttribute('data-section-id');
+    document.getElementById(sectionId).remove();
   });
 
   sectionCount++; // Incrementa o contador para a próxima seção
@@ -185,19 +195,18 @@ document.getElementById('file-input-0').addEventListener('change', function () {
 
 // Função para processar os arquivos
 document.getElementById('process-files').addEventListener('click', function () {
-  let allData = [];  // Armazena todos os dados extraídos de todos os arquivos
-  let filesProcessed = 0; // Contador para verificar se todos os arquivos foram processados
-
-  // Objeto para rastrear a contagem de sufixos para cada código
+  let allData = [];
+  let filesProcessed = 0;
   let codeCount = {};
 
-  // Itera por todas as seções de arquivos
   for (let i = 0; i < sectionCount; i++) {
+    let section = document.getElementById(`section-${i}`);
+    if (!section) continue;
+
     let fileInput = document.getElementById(`file-input-${i}`);
     let driverPattern = document.getElementById(`driver-pattern-${i}`).value.trim();
     let ownerName = document.getElementById(`owner-name-${i}`).value.trim();
 
-    // Verifica se os campos foram preenchidos corretamente
     if (fileInput.files.length === 0 || !driverPattern || !ownerName) {
       alert("Por favor, preencha todos os campos antes de processar.");
       return;
@@ -212,43 +221,32 @@ document.getElementById('process-files').addEventListener('click', function () {
       let sheet = workbook.Sheets[workbook.SheetNames[0]];
       let jsonData = XLSX.utils.sheet_to_json(sheet, { header: 1 });
 
-      // Processar os dados da planilha
-      let rowNumber = 1; // Inicializa a numeração do motorista
+      let rowNumber = 1;
       for (let j = 10; j < jsonData.length; j++) {
         let row = jsonData[j];
+        let codigo = row[18];
 
-        let codigo = row[18]; // Extrai o código da coluna S (índice 18)
         if (codigo) {
-          // Verifica se o código já existe no objeto codeCount
-          if (codeCount[codigo]) {
-            codeCount[codigo]++; // Incrementa o contador para o código existente
-          } else {
-            codeCount[codigo] = 1; // Inicializa o contador para um novo código
-          }
-
-          // Concatena o sufixo com base no contador
+          codeCount[codigo] = (codeCount[codigo] || 0) + 1;
           codigo = `${codigo}-${codeCount[codigo]}`;
 
-          // Adiciona os dados processados ao array allData
-          let motorista = driverPattern.replace('__1', '') + '__' + rowNumber; // Remove '__1' e adiciona a numeração
+          let motorista = driverPattern.replace('__1', '') + '__' + rowNumber;
 
           allData.push({
             'Código': codigo,
-            'Motorista': motorista, // Como 'Leste1__1', 'Leste1__2' etc.
-            'Cliente': row[1], // Coluna B
-            'Dono': ownerName // Coluna D
+            'Motorista': motorista,
+            'Cliente': row[1],
+            'Dono': ownerName
           });
 
-          rowNumber++; // Incrementa a numeração para o próximo motorista
+          rowNumber++;
         }
       }
 
-      // Incrementa o contador para indicar que o arquivo foi processado
       filesProcessed++;
 
-      // Quando todos os arquivos forem processados, gera o novo arquivo XLSX
       if (filesProcessed === sectionCount) {
-        gerarPlanilha(allData); // Chama a função para gerar a planilha
+        gerarPlanilha(allData);
       }
     };
 
@@ -262,7 +260,6 @@ function gerarPlanilha(dados) {
   let wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, "Dados Processados");
 
-  // Gera o arquivo e oferece para o usuário baixar com nome formatado
   let dataHoje = new Date();
   let dia = ("0" + dataHoje.getDate()).slice(-2);
   let mes = ("0" + (dataHoje.getMonth() + 1)).slice(-2);
