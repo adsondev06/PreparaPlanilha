@@ -8,6 +8,7 @@
 //   document.getElementById(driverPatternId).value = nomeSemExtensao;
 // }
 
+// // Adiciona evento de clique para adicionar uma nova seção
 // document.getElementById('add-section').addEventListener('click', function () {
 //   let newSection = document.createElement('div');
 //   newSection.classList.add('file-section');
@@ -16,62 +17,63 @@
 //   newSection.innerHTML = `
 //     <label for="file-input-${sectionCount}">Arquivo XLSX:</label>
 //     <input type="file" id="file-input-${sectionCount}" class="file-input" accept=".xlsx" />
-
+    
 //     <label for="driver-pattern-${sectionCount}">Padrão do Motorista:</label>
 //     <input type="text" id="driver-pattern-${sectionCount}" class="driver-pattern" placeholder="Leste1__1" />
-
+    
 //     <label for="owner-name-${sectionCount}">Nome do Dono:</label>
 //     <input type="text" id="owner-name-${sectionCount}" class="owner-name" placeholder="Digite o nome do dono" />
-
-//     <button type="button" class="remove-section" data-section-id="section-${sectionCount}">Remover Seção</button>
+    
+//     <button type="button" class="remove-section" onclick="removerSecao(${sectionCount})">Remover</button>
 //   `;
 
 //   document.getElementById('file-sections').appendChild(newSection);
 
-//   // Adiciona o evento de mudança de arquivo para o input recém-adicionado
+//   // Adiciona evento para preencher o campo driver-pattern ao selecionar um arquivo
 //   let fileInput = document.getElementById(`file-input-${sectionCount}`);
 //   let driverPatternInput = document.getElementById(`driver-pattern-${sectionCount}`);
-
 //   fileInput.addEventListener('change', function () {
 //     if (fileInput.files.length > 0) {
 //       let fileName = fileInput.files[0].name;
 //       let nomeSemExtensao = fileName.split('.').slice(0, -1).join('.');
-//       driverPatternInput.value = nomeSemExtensao; // Preenche o campo com o nome do arquivo
+//       driverPatternInput.value = nomeSemExtensao;
 //     }
 //   });
 
-//   // Adiciona o evento ao botão de remoção
-//   let removeButton = newSection.querySelector('.remove-section');
-//   removeButton.addEventListener('click', function () {
-//     let sectionId = removeButton.getAttribute('data-section-id');
-//     document.getElementById(sectionId).remove();
-//   });
-
-//   sectionCount++; // Incrementa o contador para a próxima seção
+//   sectionCount++;
 // });
 
-// // Preencher o campo driver-pattern-0 com o nome do arquivo assim que for carregado
+// // Adiciona botão "Remover" na primeira seção
+// document.querySelector('.file-section').innerHTML += `
+//   <button type="button" class="remove-section" onclick="removerSecao(0)">Remover</button>
+// `;
+
+// // Função para remover uma seção específica
+// function removerSecao(sectionId) {
+//   let section = document.getElementById(`section-${sectionId}`);
+//   if (section) {
+//     section.remove();
+//   }
+// }
+
+// // Preenche o campo driver-pattern-0 com o nome do arquivo selecionado
 // document.getElementById('file-input-0').addEventListener('change', function () {
 //   preencherDriverPatternComNomeArquivo('file-input-0', 'driver-pattern-0');
 // });
 
-// // Função para processar os arquivos
+// // Processa os arquivos e gera a planilha
 // document.getElementById('process-files').addEventListener('click', function () {
 //   let allData = [];
 //   let filesProcessed = 0;
 //   let codeCount = {};
 
 //   for (let i = 0; i < sectionCount; i++) {
-//     let section = document.getElementById(`section-${i}`);
-//     if (!section) continue;
-
 //     let fileInput = document.getElementById(`file-input-${i}`);
-//     let driverPattern = document.getElementById(`driver-pattern-${i}`).value.trim();
-//     let ownerName = document.getElementById(`owner-name-${i}`).value.trim();
+//     let driverPattern = document.getElementById(`driver-pattern-${i}`)?.value.trim();
+//     let ownerName = document.getElementById(`owner-name-${i}`)?.value.trim();
 
-//     if (fileInput.files.length === 0 || !driverPattern || !ownerName) {
-//       alert("Por favor, preencha todos os campos antes de processar.");
-//       return;
+//     if (!fileInput || fileInput.files.length === 0 || !driverPattern || !ownerName) {
+//       continue;
 //     }
 
 //     let file = fileInput.files[0];
@@ -89,13 +91,22 @@
 //         let codigo = row[18];
 
 //         if (codigo) {
-//           codeCount[codigo] = (codeCount[codigo] || 0) + 1;
-//           codigo = `${codigo}-${codeCount[codigo]}`;
+//           // Converte códigos numéricos para string sem notação científica
+//           if (typeof codigo === "number") {
+//             codigo = codigo.toLocaleString('fullwide', { useGrouping: false });
+//           }
+
+//           if (codigo.length <= 10) {
+//             codeCount[codigo] = (codeCount[codigo] || 0) + 1;
+//             if (codeCount[codigo] > 1) {
+//               codigo = `${codigo}-${codeCount[codigo]}`;
+//             }
+//           }
 
 //           let motorista = driverPattern.replace('__1', '') + '__' + rowNumber;
 
 //           allData.push({
-//             'Código': codigo,
+//             'Código': codigo.toString(),
 //             'Motorista': motorista,
 //             'Cliente': row[1],
 //             'Dono': ownerName
@@ -106,7 +117,6 @@
 //       }
 
 //       filesProcessed++;
-
 //       if (filesProcessed === sectionCount) {
 //         gerarPlanilha(allData);
 //       }
@@ -116,7 +126,7 @@
 //   }
 // });
 
-// // Função para gerar o arquivo XLSX
+// // Gera o arquivo XLSX com os dados processados
 // function gerarPlanilha(dados) {
 //   let ws = XLSX.utils.json_to_sheet(dados);
 //   let wb = XLSX.utils.book_new();
@@ -130,8 +140,6 @@
 
 //   XLSX.writeFile(wb, nomeArquivo);
 // }
-
-
 
 
 
@@ -232,6 +240,13 @@ document.getElementById('process-files').addEventListener('click', function () {
           // Converte códigos numéricos para string sem notação científica
           if (typeof codigo === "number") {
             codigo = codigo.toLocaleString('fullwide', { useGrouping: false });
+          }
+
+          // Tratamento para códigos iniciados com '13'
+          if (codigo.startsWith('13')) {
+            if (!codigo.includes('-1')) {
+              codigo += '-1';
+            }
           }
 
           if (codigo.length <= 10) {
